@@ -40,51 +40,46 @@ data.columns
 
 #%%
 
-
+from imblearn.over_sampling import SMOTE
+from sklearn.utils import resample
 
 data.columns = data.columns.str.strip()
 data = data.query("Label != 'Heartbleed' & Label != 'Infiltration'")
 
-# Step 1: Ratio-Based Features
+# Ratio-Based Features
 data['Fwd to Bwd Packet Ratio'] = data['Total Fwd Packets'] / (data['Total Backward Packets'] + 1e-9)
 data['Bwd to Fwd Packet Ratio'] = data['Total Backward Packets'] / (data['Total Fwd Packets'] + 1e-9)
 data['Fwd to Bwd Length Ratio'] = data['Total Length of Fwd Packets'] / (data['Total Length of Bwd Packets'] + 1e-9)
 data['Bwd to Fwd Length Ratio'] = data['Total Length of Bwd Packets'] / (data['Total Length of Fwd Packets'] + 1e-9)
 
-# Step 2: Statistical Features
+# Statistical Features
 data['Total Packet Length'] = data['Total Length of Fwd Packets'] + data['Total Length of Bwd Packets']
 data['Total Packet Count'] = data['Total Fwd Packets'] + data['Total Backward Packets']
 data['Flow IAT Range'] = data['Flow IAT Max'] - data['Flow IAT Min']
 
-# Step 3: Flag Ratios
+# Flag Ratios
 data['FIN Ratio'] = data['FIN Flag Count'] / (data['Total Packet Count'] + 1e-9)
 data['SYN Ratio'] = data['SYN Flag Count'] / (data['Total Packet Count'] + 1e-9)
 data['ACK Ratio'] = data['ACK Flag Count'] / (data['Total Packet Count'] + 1e-9)
 data['PSH Ratio'] = data['PSH Flag Count'] / (data['Total Packet Count'] + 1e-9)
 data['URG Ratio'] = data['URG Flag Count'] / (data['Total Packet Count'] + 1e-9)
 
-# Step 4: Time-Based Features
+# Time-Based Features
 data['Idle Time Range'] = data['Idle Max'] - data['Idle Min']
 data['Active Time Range'] = data['Active Max'] - data['Active Min']
+data['IAT Range'] = data['Flow IAT Max'] - data['Flow IAT Min']
+data['Activity-to-Idle Ratio'] = (data['Active Max'] + data['Active Min']) / (data['Idle Max'] + data['Idle Min'] + 1e-9)
 
-# Step 5: Flow Characteristics
+# Flow Characteristics
 data['Packets Per Flow'] = data['Total Packet Count'] / (data['Flow Duration'] + 1e-9)
 data['Flow Header to Length Ratio'] = (data['Fwd Header Length'] + data['Bwd Header Length']) / (data['Total Packet Length'] + 1e-9)
 
-# Step 6: Interaction Features
+# Interaction Features
 data['Flow Intensity'] = data['Flow Bytes/s'] * data['Flow Packets/s']
 data['Packet Size Intensity'] = data['Avg Fwd Segment Size'] * data['Avg Bwd Segment Size']
-
-# Add more interaction-based features
 data['Avg Packet Length'] = (data['Total Length of Fwd Packets'] + data['Total Length of Bwd Packets']) / data['Total Packet Count']
 data['Header to Packet Length Ratio'] = (data['Fwd Header Length'] + data['Bwd Header Length']) / data['Total Packet Length']
 data['Flow Intensity'] = data['Flow Bytes/s'] * data['Flow Packets/s']
-
-# Time-based feature: IAT Range
-data['IAT Range'] = data['Flow IAT Max'] - data['Flow IAT Min']
-
-# Time-based feature: Activity-to-Idle Ratio
-data['Activity-to-Idle Ratio'] = (data['Active Max'] + data['Active Min']) / (data['Idle Max'] + data['Idle Min'] + 1e-9)
 
 
 # Remove any rows with NaN or infinite values after feature engineering
@@ -121,7 +116,7 @@ y_encoded = label_encoder.fit_transform(y)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Split the original data into training/validation and holdout sets
+# Split the original data into training/validation and holdout sets to have data to predict that was never viewed by the model during training
 X_initial_train, X_holdout, y_initial_train, y_holdout = train_test_split(
     X_scaled, y_encoded, test_size=0.2, random_state=42
 )
@@ -129,7 +124,7 @@ X_initial_train, X_holdout, y_initial_train, y_holdout = train_test_split(
 # Apply SMOTE only to the training/validation data
 X_resampled, y_resampled = SMOTE(random_state=43).fit_resample(X_initial_train, y_initial_train)
 
-# Downsample the resampled data if necessary
+# Downsample the resampled data
 downsample_indices = np.random.choice(len(X_resampled), size=250000, replace=False)
 X_resampled = X_resampled[downsample_indices]
 y_resampled = y_resampled[downsample_indices]
