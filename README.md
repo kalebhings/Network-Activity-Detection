@@ -57,12 +57,12 @@ The code and it being ran can be viewed in this [notebook](https://github.com/ka
 - Increasing data for underrepresented attack types is critical for improving recall and precision.
 - Simulating a virtual environment for attack data collection could provide balanced, high-quality datasets to have more data for some of the attacks that were porly represented.
 - Fine-tuning feature engineering and experimenting with ensemble methods may further improve detection capabilities.
-- Integration with Raw PCAP Data: Developing a pipeline to process and extract features directly from PCAP files would allow the model to predict network intrusions in real-world scenarios. This approach eliminates the reliance on pre-cleaned and organized datasets, making the system more practical for live deployment.
 
 ## Future Work
 - Set up a virtual lab to generate additional attack data for balanced datasets.
 - Deploy the model to monitor live network traffic in a production environment.
 - Explore advanced architectures like transformers or ensemble techniques for better accuracy.
+- Integration with Raw PCAP Data: Developing a pipeline to process and extract features directly from PCAP files would allow the model to predict network intrusions in real-world scenarios. This approach eliminates the reliance on pre-cleaned and organized datasets, making the system more practical for live deployment.
 
 ## Tools and Technologies
 - Programming Languages: Python
