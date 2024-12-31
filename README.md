@@ -49,6 +49,8 @@ However, performance dropped significantly for underrepresented classes like Bru
 
 The disparity between well-represented and underrepresented classes demonstrates the need for additional data or advanced techniques to improve detection for rare attacks.
 
+The code and it being ran can be viewed in this [notebook](https://github.com/kalebhings/Network-Activity-Detection/blob/main/NeuralNetworkModel.ipynb). 
+
 ![confusion matrix](https://github.com/kalebhings/Network-Activity-Detection/blob/main/confusionmatrix.png?raw=true)
 
 ## Insights
