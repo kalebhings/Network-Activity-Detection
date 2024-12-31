@@ -1,52 +1,71 @@
 # Network Intrusion Detection Using Machine Learning
 
 ## Overview
-This project demonstrates the use of machine learning and neural networks to detect network intrusions by analyzing network traffic data. The goal is to identify various types of network attacks, including brute force attacks, SQL injection, and cross-site scripting (XSS), among others, with high accuracy and generalization.
+This project demonstrates the use of machine learning and neural networks to detect network intrusions by analyzing network traffic data. The aim is to identify various types of network attacks, including brute force attacks, SQL injection, and cross-site scripting (XSS), as well as other intrusion types, with high accuracy and generalization.
 
 ## Motivation
-With the increasing reliance on networked systems, ensuring security is more critical than ever. This project explores the application of machine learning in cybersecurity to detect malicious activity in network traffic effectively. By leveraging advanced machine learning techniques and neural networks, the project aims to contribute to the growing field of automated intrusion detection systems.
+With the increasing reliance on networked systems, cybersecurity has become a critical focus area. This project explores the application of machine learning in intrusion detection systems (IDS) to automate the identification of malicious activities. Through experimentation with multiple models and approaches, this project aims to advance understanding and highlight the capabilities of machine learning in cybersecurity.
 
 ## Data Source
-The data used in this project comes from the CICIDS2017 dataset, a comprehensive dataset designed for evaluating intrusion detection systems. The dataset includes network traffic from a variety of attack scenarios and normal behavior. It is publicly available at the [University of New Brunswick's website](https://www.unb.ca/cic/datasets/ids-2017.html).
+The data used in this project is the CICIDS2017 dataset, a benchmark dataset for intrusion detection research. It includes network traffic data with both normal behavior and a variety of attack scenarios. The dataset, along with its raw pcap files and preprocessed CSV files, is publicly available at the [University of New Brunswick's website](https://www.unb.ca/cic/datasets/ids-2017.html).
+
+## Challenges
+Initially, I explored multiple data sources, including pcap files and log files, but faced challenges with insufficient data or difficulty in loading due to size constraints. Specifically, I attempted to use pcap files from the CICIDS2017 dataset, which contain raw network traffic data from which the CSV files were derived. However, these files were extraordinarily large (e.g., over 50GB), and despite optimization attempts, loading even a single pcap file took over an hour and still did not complete due to the sheer volume of data. Additionally, I explored pcap files from other datasets, but many of them had insufficient data to train and evaluate a robust machine learning model effectively. 
+
+As a result, I shifted to using the pre-extracted CSV files from the CICIDS2017 dataset, which provided a more efficient and manageable format for processing. To further streamline the process, I reduced the dataset size by selecting a portion of the data to balance runtime and performance without compromising the diversity of attack scenarios.
+
+One limitation was the imbalanced representation of certain attack types like brute force, SQL injection, and XSS. These limitations point to potential improvements, such as simulating a virtual environment to generate balanced data for underrepresented attack types.
 
 ## Approach
-1. **Data Preprocessing**: 
-   - Raw data from CSV files is cleaned, scaled, and encoded for use in machine learning models.
-   - Missing and infinite values are handled to ensure robustness.
 
-2. **Model Development**:
-   - A Random Forest classifier was initially implemented to establish a baseline.
-   - A neural network using TensorFlow was developed to improve performance and handle complex patterns in the data.
+### Models Tried
 
-3. **Optimization**:
-   - Early stopping and learning rate scheduling are used to prevent overfitting and improve model generalization.
-   - Class imbalances are addressed using techniques like SMOTE and class weighting.
+- Isolation Forest: Tested for anomaly detection but lacked granularity for classifying specific attack types.
+- Random Forest: Established as a baseline, providing good accuracy but limited scalability.
+- Custom Neural Network with TensorFlow: Developed and refined to handle complex patterns in the data, achieving better generalization.
 
-## Key Features
-- **Neural Network**: A deep learning model with multiple dense layers and dropout for regularization.
-- **Early Stopping and ReduceLROnPlateau**: Ensures efficient training by stopping early and dynamically adjusting the learning rate.
-- **Feature Engineering**: Comprehensive preprocessing pipeline to handle raw network traffic data.
-- **Confusion Matrix and Metrics**: Visual and quantitative evaluation of the model's performance across multiple attack types.
+### Data Preprocessing
+- Feature Engineering: Created ratio-based, time-based, statistical, and interaction features to enhance model performance.
+- Handling Imbalance: Addressed class imbalance with SMOTE and downsampling techniques.
+![Imbalance Chart](https://github.com/kalebhings/Network-Activity-Detection/blob/main/balancingchart.png?raw=true)
+- Standardization: Scaled features to ensure compatibility with neural network models.
+
+### Model Optimization
+- Learning Rate Scheduler: Used ReduceLROnPlateau to adjust learning rates dynamically.
+- Early Stopping: Prevented overfitting by monitoring validation loss during training.
+- Custom Metrics: Evaluated precision, recall, and F1-score for each attack type.
+
+### Evaluation Metrics
+The model's performance is assessed using:
+- Precision
+- Recall
+- F1-Score
+- Confusion Matrix Visualization
 
 ## Results
-The project achieves high accuracy in detecting various types of network intrusions. Metrics such as precision, recall, and F1-score are evaluated for each attack type to ensure comprehensive assessment.
+The model achieved an overall accuracy of 90% on the holdout set, performing well on classes with sufficient representation, such as DDoS (F1-Score: 0.98) and DoS Hulk (F1-Score: 0.97). These results indicate strong detection capabilities for these attack types.
 
-## Tools and Technologies
-- Python
-- TensorFlow
-- Pandas and NumPy
-- Scikit-learn
-- Seaborn and Matplotlib
-- SMOTE (Synthetic Minority Oversampling Technique)
+However, performance dropped significantly for underrepresented classes like Brute Force, SQL Injection, and XSS, where low Precision (e.g., 0.01 for Brute Force) highlights issues with false positives. While Recall for these classes was often high (e.g., 1.00 for XSS), the imbalance in the dataset limited the model's ability to generalize effectively.
 
-## Data Disclaimer
+The disparity between well-represented and underrepresented classes demonstrates the need for additional data or advanced techniques to improve detection for rare attacks.
 
-The CICIDS2017 dataset is publicly available and was used in compliance with its licensing terms. Ensure proper attribution if reusing the dataset for derivative work.
+![confusion matrix](https://github.com/kalebhings/Network-Activity-Detection/blob/main/confusionmatrix.png?raw=true)
+
+## Insights
+- Increasing data for underrepresented attack types is critical for improving recall and precision.
+- Simulating a virtual environment for attack data collection could provide balanced, high-quality datasets to have more data for some of the attacks that were porly represented.
+- Fine-tuning feature engineering and experimenting with ensemble methods may further improve detection capabilities.
+- Integration with Raw PCAP Data: Developing a pipeline to process and extract features directly from PCAP files would allow the model to predict network intrusions in real-world scenarios. This approach eliminates the reliance on pre-cleaned and organized datasets, making the system more practical for live deployment.
 
 ## Future Work
-- Integration with real-time network monitoring tools.
-- Exploration of other machine learning algorithms like gradient boosting and unsupervised anomaly detection.
-- Deployment of the trained model for live traffic analysis in a production environment.
+- Set up a virtual lab to generate additional attack data for balanced datasets.
+- Deploy the model to monitor live network traffic in a production environment.
+- Explore advanced architectures like transformers or ensemble techniques for better accuracy.
+
+## Tools and Technologies
+- Programming Languages: Python
+- Libraries: TensorFlow, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, SMOTE (Imbalanced-Learn)
+- Dataset: CICIDS2017
 
 ## Acknowledgments
-Special thanks to the University of New Brunswick for providing the CICIDS2017 dataset and supporting the research community in intrusion detection.
+Thanks to the University of New Brunswick for providing the CICIDS2017 dataset.
